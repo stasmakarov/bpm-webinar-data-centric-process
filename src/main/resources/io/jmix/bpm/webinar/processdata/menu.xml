@@ -3,6 +3,10 @@
 
     <menu id="application" title="msg://io.jmix.bpm.webinar.processdata/menu.application.title" opened="true">
         <item view="pdt_User.list" title="msg://io.jmix.bpm.webinar.processdata.view.user/UserListView.title"/>
+        <item view="pdt_Product.list" title="msg://io.jmix.bpm.webinar.processdata.view.product/productListView.title"/>
+        <item view="pdt_Order.list" title="msg://io.jmix.bpm.webinar.processdata.view.order/orderListView.title"/>
+        <item view="pdt_ControlPanelView"
+              title="msg://io.jmix.bpm.webinar.processdata.view.controlpanel/controlPanelView.title"/>
     </menu>
 
 </menu-config>

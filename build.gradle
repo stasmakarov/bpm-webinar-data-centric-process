@@ -52,6 +52,9 @@ dependencies {
     implementation 'org.postgresql:postgresql'
     implementation 'io.jmix.bpm:jmix-bpm-flowui-starter'
     implementation 'io.jmix.bpm:jmix-bpm-starter'
+    implementation 'io.jmix.appsettings:jmix-appsettings-starter'
+    implementation 'io.jmix.appsettings:jmix-appsettings-flowui-starter'
+
 }
 
 configurations.implementation {
