@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" xmlns:jmix="http://jmix.io/schema/bpm/bpmn" xmlns:flowable="http://flowable.org/bpmn" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.flowable.org/processdef" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL http://www.omg.org/spec/BPMN/2.0/20100501/BPMN20.xsd">
-  <process id="create-random-order" name="Create random order" isExecutable="true">
+  <process id="create-order" name="Create order" isExecutable="true">
+    <documentation>Create order programmatically, all tasks in synchronous mode</documentation>
     <startEvent id="startEvent1">
       <outgoing>Flow_1s36j3v</outgoing>
     </startEvent>
@@ -80,7 +81,7 @@
     <sequenceFlow id="Flow_0y2vasg" sourceRef="Gateway_1q5s180" targetRef="Event_1ox645e" />
   </process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_process">
-    <bpmndi:BPMNPlane id="BPMNPlane_process" bpmnElement="create-random-order">
+    <bpmndi:BPMNPlane id="BPMNPlane_process" bpmnElement="create-order">
       <bpmndi:BPMNShape id="BPMNShape_startEvent1" bpmnElement="startEvent1">
         <omgdc:Bounds x="150" y="150" width="36" height="36" />
       </bpmndi:BPMNShape>

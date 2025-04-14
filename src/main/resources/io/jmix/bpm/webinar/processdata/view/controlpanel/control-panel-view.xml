@@ -3,5 +3,16 @@
       title="msg://controlPanelView.title">
     <layout>
         <button id="resetBtn" text="Reset all"/>
+        <vbox>
+            <h4 text="Run processes in multiple threads"/>
+            <hbox>
+                <textField id="numOfThreadsField" datatype="int" label="Number of threads"/>
+                <textField id="numberOfProcessesField" datatype="int" label="Number of processes"/>
+            </hbox>
+            <hbox>
+                <comboBox id="processComboBox" label="Process to start" width="400px"/>
+            </hbox>
+            <button id="multiBtn" text="Run" themeNames="primary"/>
+        </vbox>
     </layout>
 </view>

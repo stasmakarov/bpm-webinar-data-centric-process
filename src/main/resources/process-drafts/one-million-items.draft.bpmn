@@ -1,21 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-             xmlns:flowable="http://flowable.org/bpmn"
-             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
-             xmlns:jmix="http://jmix.io/schema/bpm/bpmn"
-             xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI"
-             typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath"
-             targetNamespace="http://www.flowable.org/processdef"
-             xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL http://www.omg.org/spec/BPMN/2.0/20100501/BPMN20.xsd">
-    <process id="one-million-items" name="One million items" isExecutable="true">
-        <startEvent id="startEvent1"></startEvent>
-    </process>
-    <bpmndi:BPMNDiagram id="BPMNDiagram_process">
-        <bpmndi:BPMNPlane bpmnElement="process" id="BPMNPlane_process">
-            <bpmndi:BPMNShape bpmnElement="startEvent1" id="BPMNShape_startEvent1">
-                <omgdc:Bounds height="36.0" width="36.0" x="150.0" y="150.0"></omgdc:Bounds>
-            </bpmndi:BPMNShape>
-        </bpmndi:BPMNPlane>
-    </bpmndi:BPMNDiagram>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:jmix="http://jmix.io/schema/bpm/bpmn" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.flowable.org/processdef" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL http://www.omg.org/spec/BPMN/2.0/20100501/BPMN20.xsd">
+  <process id="one-million-items" name="One million items" isExecutable="true">
+    <startEvent id="startEvent1">
+      <extensionElements>
+        <jmix:formData type="input-dialog" openMode="DIALOG">
+          <jmix:formFields>
+            <jmix:formField id="howMany" caption="How many" type="long" editable="true" required="true" />
+          </jmix:formFields>
+        </jmix:formData>
+      </extensionElements>
+      <outgoing>Flow_10scv0e</outgoing>
+    </startEvent>
+    <sequenceFlow id="Flow_10scv0e" sourceRef="startEvent1" targetRef="Activity_1dapd1s" />
+    <callActivity id="Activity_1dapd1s" name="Create orders" calledElement="create-random-order">
+      <incoming>Flow_10scv0e</incoming>
+      <outgoing>Flow_0oxysad</outgoing>
+      <multiInstanceLoopCharacteristics isSequential="true">
+        <loopCardinality xsi:type="tFormalExpression">${howMany}</loopCardinality>
+      </multiInstanceLoopCharacteristics>
+    </callActivity>
+    <endEvent id="Event_05obzon">
+      <incoming>Flow_0oxysad</incoming>
+    </endEvent>
+    <sequenceFlow id="Flow_0oxysad" sourceRef="Activity_1dapd1s" targetRef="Event_05obzon" />
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_process">
+    <bpmndi:BPMNPlane id="BPMNPlane_process" bpmnElement="one-million-items">
+      <bpmndi:BPMNShape id="BPMNShape_startEvent1" bpmnElement="startEvent1">
+        <omgdc:Bounds x="150" y="150" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0piyci6_di" bpmnElement="Activity_1dapd1s">
+        <omgdc:Bounds x="240" y="128" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_05obzon_di" bpmnElement="Event_05obzon">
+        <omgdc:Bounds x="402" y="150" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_10scv0e_di" bpmnElement="Flow_10scv0e">
+        <di:waypoint x="186" y="168" />
+        <di:waypoint x="240" y="168" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0oxysad_di" bpmnElement="Flow_0oxysad">
+        <di:waypoint x="340" y="168" />
+        <di:waypoint x="402" y="168" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
 </definitions>

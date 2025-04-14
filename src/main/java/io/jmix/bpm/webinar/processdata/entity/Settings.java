@@ -26,9 +26,33 @@ public class Settings extends AppSettingsEntity {
     @Column(name = "IN_STOCK")
     private Long inStock;
 
-    @AppSettingsDefault("1L")
+    @AppSettingsDefault("1")
     @Column(name = "NEXT_ORDER_NUMBER")
     private Long nextOrderNumber;
+
+    @AppSettingsDefault("3")
+    @Column(name = "THREADS")
+    private Integer threads;
+
+    @AppSettingsDefault("5")
+    @Column(name = "PROCESS_PER_THREAD")
+    private Integer processPerThread;
+
+    public Integer getProcessPerThread() {
+        return processPerThread;
+    }
+
+    public void setProcessPerThread(Integer processPerThread) {
+        this.processPerThread = processPerThread;
+    }
+
+    public Integer getThreads() {
+        return threads;
+    }
+
+    public void setThreads(Integer threads) {
+        this.threads = threads;
+    }
 
     public Long getInStock() {
         return inStock;
