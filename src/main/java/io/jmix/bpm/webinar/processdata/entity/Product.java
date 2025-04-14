@@ -3,10 +3,12 @@ package io.jmix.bpm.webinar.processdata.entity;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
+import io.jmix.pessimisticlock.annotation.PessimisticLock;
 import jakarta.persistence.*;
 
 import java.util.UUID;
 
+@PessimisticLock(timeoutSec = 120)
 @JmixEntity
 @Table(name = "PDT_PRODUCT")
 @Entity(name = "pdt_Product")

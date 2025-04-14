@@ -17,10 +17,9 @@
         <action id="closeAction" type="detail_close"/>
     </actions>
     <layout>
-        <formLayout id="form" dataContainer="orderDc">
+        <formLayout id="form" dataContainer="orderDc" width="400px">
             <responsiveSteps>
                 <responsiveStep minWidth="0" columns="1"/>
-                <responsiveStep minWidth="40em" columns="2"/>
             </responsiveSteps>
             <textField id="numberField" property="number"/>
             <entityPicker id="productField" property="product">
@@ -31,6 +30,7 @@
             </entityPicker>
             <textField id="quantityField" property="quantity"/>
             <select id="statusField" property="status"/>
+            <textField id="businessKeyField" property="businessKey"/>
         </formLayout>
         <hbox id="detailActions">
             <button id="saveAndCloseButton" action="saveAction"/>

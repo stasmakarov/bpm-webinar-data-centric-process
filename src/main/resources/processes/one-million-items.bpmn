@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:jmix="http://jmix.io/schema/bpm/bpmn" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.flowable.org/processdef" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL http://www.omg.org/spec/BPMN/2.0/20100501/BPMN20.xsd">
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:jmix="http://jmix.io/schema/bpm/bpmn" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:flowable="http://flowable.org/bpmn" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.flowable.org/processdef" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL http://www.omg.org/spec/BPMN/2.0/20100501/BPMN20.xsd">
   <process id="one-million-items" name="One million items" isExecutable="true">
     <startEvent id="startEvent1">
       <extensionElements>
@@ -12,10 +12,10 @@
       <outgoing>Flow_10scv0e</outgoing>
     </startEvent>
     <sequenceFlow id="Flow_10scv0e" sourceRef="startEvent1" targetRef="Activity_1dapd1s" />
-    <callActivity id="Activity_1dapd1s" name="Create orders" calledElement="create-random-order">
+    <callActivity id="Activity_1dapd1s" name="Create orders" flowable:async="true" calledElement="create-random-order">
       <incoming>Flow_10scv0e</incoming>
       <outgoing>Flow_0oxysad</outgoing>
-      <multiInstanceLoopCharacteristics isSequential="true">
+      <multiInstanceLoopCharacteristics>
         <loopCardinality xsi:type="tFormalExpression">${howMany}</loopCardinality>
       </multiInstanceLoopCharacteristics>
     </callActivity>

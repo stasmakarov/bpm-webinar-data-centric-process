@@ -34,6 +34,28 @@ public class Order {
     @Column(name = "STATUS")
     private Integer status;
 
+    @Column(name = "PROCESS_INSTANCE_ID")
+    private String processInstanceId;
+
+    @Column(name = "BUSINESS_KEY")
+    private String businessKey;
+
+    public String getBusinessKey() {
+        return businessKey;
+    }
+
+    public void setBusinessKey(String businessKey) {
+        this.businessKey = businessKey;
+    }
+
+    public String getProcessInstanceId() {
+        return processInstanceId;
+    }
+
+    public void setProcessInstanceId(String processInstanceId) {
+        this.processInstanceId = processInstanceId;
+    }
+
     public OrderStatus getStatus() {
         return status == null ? null : OrderStatus.fromId(status);
     }
