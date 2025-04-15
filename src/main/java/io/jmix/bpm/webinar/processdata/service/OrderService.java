@@ -82,6 +82,7 @@ public class OrderService {
             execution.setVariable("product", product);
             execution.setVariable("quantity", quantity);
             execution.setVariable("processInstanceId", execution.getProcessInstanceId());
+            execution.setVariable("businessKey", "Ord.# " + orderNumber);
             return null;
         });
     }

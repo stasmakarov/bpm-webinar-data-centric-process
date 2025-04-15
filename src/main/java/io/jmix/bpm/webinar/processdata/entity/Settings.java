@@ -38,6 +38,30 @@ public class Settings extends AppSettingsEntity {
     @Column(name = "PROCESS_PER_THREAD")
     private Integer processPerThread;
 
+    @AppSettingsDefault("inventoryMessageQueue")
+    @Column(name = "INVENTORY_MESSAGE_QUEUE")
+    private String inventoryQueue;
+
+    @AppSettingsDefault("inventoryReplyQueue")
+    @Column(name = "INVENTORY_REPLY_QUEUE")
+    private String replyQueue;
+
+    public String getReplyQueue() {
+        return replyQueue;
+    }
+
+    public void setReplyQueue(String replyQueue) {
+        this.replyQueue = replyQueue;
+    }
+
+    public String getInventoryQueue() {
+        return inventoryQueue;
+    }
+
+    public void setInventoryQueue(String inventoryQueue) {
+        this.inventoryQueue = inventoryQueue;
+    }
+
     public Integer getProcessPerThread() {
         return processPerThread;
     }

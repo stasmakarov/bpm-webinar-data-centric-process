@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:jmix="http://jmix.io/schema/bpm/bpmn" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:flowable="http://flowable.org/bpmn" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.flowable.org/processdef" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL http://www.omg.org/spec/BPMN/2.0/20100501/BPMN20.xsd">
+  <process id="entity-data-task-auto" name="Entity data task programmatic start (async)" isExecutable="true">
+    <documentation>Entity data task programmatic start with auto generated data, all tasks async</documentation>
+    <startEvent id="startEvent1">
+      <extensionElements>
+        <jmix:formData type="no-form" />
+      </extensionElements>
+      <outgoing>Flow_1t5q2sz</outgoing>
+    </startEvent>
+    <sequenceFlow id="Flow_1t5q2sz" sourceRef="startEvent1" targetRef="Activity_19njpd2" />
+    <serviceTask id="Activity_0tumipq" name="Create order" flowable:async="true" flowable:type="jmix-create-entity">
+      <extensionElements>
+        <flowable:field name="entityName">
+          <flowable:string>pdt_Order</flowable:string>
+        </flowable:field>
+        <flowable:field name="resultVariable">
+          <flowable:string>order</flowable:string>
+        </flowable:field>
+        <flowable:field name="entityAttributes">
+          <flowable:string>[{"name":"number","valueType":"expression","value":"${number}"},{"name":"product","valueType":"expression","value":"${product}"},{"name":"quantity","valueType":"expression","value":"${quantity}"},{"name":"status","valueType":"directValue","value":"New"},{"name":"processInstanceId","valueType":"expression","value":"${execution.processInstanceId}"}]</flowable:string>
+        </flowable:field>
+      </extensionElements>
+      <incoming>Flow_1a7hewb</incoming>
+      <outgoing>Flow_0p7u6iq</outgoing>
+    </serviceTask>
+    <sequenceFlow id="Flow_0p7u6iq" sourceRef="Activity_0tumipq" targetRef="Activity_00al6gv" />
+    <serviceTask id="Activity_00al6gv" name="Load product" flowable:type="jmix-load-entities-jpql">
+      <extensionElements>
+        <flowable:field name="jpql">
+          <flowable:string>select p from pdt_Product p where p.id = :id1</flowable:string>
+        </flowable:field>
+        <flowable:field name="resultVariable">
+          <flowable:string>product</flowable:string>
+        </flowable:field>
+        <flowable:field name="saveLoadResultAs">
+          <flowable:string>single-element</flowable:string>
+        </flowable:field>
+        <flowable:field name="jpqlParameters">
+          <flowable:string>[{"name":"id1","valueType":"expression","value":"${product.id}"}]</flowable:string>
+        </flowable:field>
+      </extensionElements>
+      <incoming>Flow_0p7u6iq</incoming>
+      <outgoing>Flow_17n9ebv</outgoing>
+    </serviceTask>
+    <exclusiveGateway id="Gateway_1u9a0g4" default="Flow_1bob223">
+      <incoming>Flow_17n9ebv</incoming>
+      <outgoing>Flow_0b6bpt8</outgoing>
+      <outgoing>Flow_1bob223</outgoing>
+    </exclusiveGateway>
+    <sequenceFlow id="Flow_17n9ebv" sourceRef="Activity_00al6gv" targetRef="Gateway_1u9a0g4" />
+    <sequenceFlow id="Flow_0b6bpt8" name="Reservation is possible" sourceRef="Gateway_1u9a0g4" targetRef="Activity_0wpeuyy">
+      <extensionElements>
+        <jmix:conditionDetails conditionSource="expression" />
+      </extensionElements>
+      <conditionExpression xsi:type="tFormalExpression">${order.quantity &lt;= product.inStock}</conditionExpression>
+    </sequenceFlow>
+    <endEvent id="Event_0bvkxgo">
+      <incoming>Flow_11nihwm</incoming>
+    </endEvent>
+    <sequenceFlow id="Flow_1bob223" sourceRef="Gateway_1u9a0g4" targetRef="Activity_0j4i28w" />
+    <sequenceFlow id="Flow_11nihwm" sourceRef="Activity_0j4i28w" targetRef="Event_0bvkxgo" />
+    <serviceTask id="Activity_0j4i28w" name="Set status &#34;Cancelled&#34;" flowable:async="true" flowable:type="jmix-modify-entity">
+      <extensionElements>
+        <flowable:field name="entityName">
+          <flowable:string>pdt_Order</flowable:string>
+        </flowable:field>
+        <flowable:field name="processVariable">
+          <flowable:string>order</flowable:string>
+        </flowable:field>
+        <flowable:field name="entityAttributes">
+          <flowable:string>[{"name":"status","valueType":"directValue","value":"Cancelled"}]</flowable:string>
+        </flowable:field>
+      </extensionElements>
+      <incoming>Flow_1bob223</incoming>
+      <outgoing>Flow_11nihwm</outgoing>
+    </serviceTask>
+    <serviceTask id="Activity_0wpeuyy" name="Do reservation" flowable:async="true" flowable:type="jmix-modify-entity">
+      <extensionElements>
+        <flowable:field name="entityName">
+          <flowable:string>pdt_Product</flowable:string>
+        </flowable:field>
+        <flowable:field name="processVariable">
+          <flowable:string>product</flowable:string>
+        </flowable:field>
+        <flowable:field name="entityAttributes">
+          <flowable:string>[{"name":"inStock","valueType":"expression","value":"${product.inStock - order.quantity}"},{"name":"reserved","valueType":"expression","value":"${product.reserved + order.quantity}"}]</flowable:string>
+        </flowable:field>
+      </extensionElements>
+      <incoming>Flow_0b6bpt8</incoming>
+      <outgoing>Flow_1i0thdu</outgoing>
+    </serviceTask>
+    <sequenceFlow id="Flow_1i0thdu" sourceRef="Activity_0wpeuyy" targetRef="Activity_19h5usm" />
+    <serviceTask id="Activity_19h5usm" name="Set status &#34;Active&#34;" flowable:async="true" flowable:type="jmix-modify-entity">
+      <extensionElements>
+        <flowable:field name="entityName">
+          <flowable:string>pdt_Order</flowable:string>
+        </flowable:field>
+        <flowable:field name="processVariable">
+          <flowable:string>order</flowable:string>
+        </flowable:field>
+        <flowable:field name="entityAttributes">
+          <flowable:string>[{"name":"status","valueType":"directValue","value":"Active"}]</flowable:string>
+        </flowable:field>
+      </extensionElements>
+      <incoming>Flow_1i0thdu</incoming>
+      <outgoing>Flow_16xx3v7</outgoing>
+    </serviceTask>
+    <endEvent id="Event_0cua96b">
+      <incoming>Flow_16xx3v7</incoming>
+    </endEvent>
+    <sequenceFlow id="Flow_16xx3v7" sourceRef="Activity_19h5usm" targetRef="Event_0cua96b" />
+    <sequenceFlow id="Flow_1a7hewb" sourceRef="Activity_19njpd2" targetRef="Activity_0tumipq" />
+    <serviceTask id="Activity_19njpd2" name="Generate values" flowable:expression="${pdt_OrderService.createRandomValuesForOrder(execution)}" jmix:taskType="springBean" jmix:beanName="pdt_OrderService">
+      <extensionElements>
+        <jmix:springBean beanName="pdt_OrderService" methodName="createRandomValuesForOrder">
+          <jmix:methodParam name="execution" type="org.flowable.engine.delegate.DelegateExecution" isVariable="true">execution</jmix:methodParam>
+        </jmix:springBean>
+      </extensionElements>
+      <incoming>Flow_1t5q2sz</incoming>
+      <outgoing>Flow_1a7hewb</outgoing>
+    </serviceTask>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_process">
+    <bpmndi:BPMNPlane id="BPMNPlane_process" bpmnElement="entity-data-task-auto">
+      <bpmndi:BPMNShape id="BPMNShape_startEvent1" bpmnElement="startEvent1">
+        <omgdc:Bounds x="-8" y="150" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1pjwm7t_di" bpmnElement="Activity_0tumipq">
+        <omgdc:Bounds x="240" y="128" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_00uf8by_di" bpmnElement="Activity_00al6gv">
+        <omgdc:Bounds x="400" y="128" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1u9a0g4_di" bpmnElement="Gateway_1u9a0g4" isMarkerVisible="true">
+        <omgdc:Bounds x="565" y="143" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0bvkxgo_di" bpmnElement="Event_0bvkxgo">
+        <omgdc:Bounds x="872" y="262" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0twu5yt_di" bpmnElement="Activity_0j4i28w">
+        <omgdc:Bounds x="700" y="240" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1tliard_di" bpmnElement="Activity_0wpeuyy">
+        <omgdc:Bounds x="700" y="128" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0aiu3bj_di" bpmnElement="Activity_19h5usm">
+        <omgdc:Bounds x="860" y="128" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0cua96b_di" bpmnElement="Event_0cua96b">
+        <omgdc:Bounds x="1012" y="150" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_107tygi_di" bpmnElement="Activity_19njpd2">
+        <omgdc:Bounds x="90" y="128" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1t5q2sz_di" bpmnElement="Flow_1t5q2sz">
+        <di:waypoint x="28" y="168" />
+        <di:waypoint x="90" y="168" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0p7u6iq_di" bpmnElement="Flow_0p7u6iq">
+        <di:waypoint x="340" y="168" />
+        <di:waypoint x="400" y="168" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_17n9ebv_di" bpmnElement="Flow_17n9ebv">
+        <di:waypoint x="500" y="168" />
+        <di:waypoint x="565" y="168" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0b6bpt8_di" bpmnElement="Flow_0b6bpt8">
+        <di:waypoint x="615" y="168" />
+        <di:waypoint x="700" y="168" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="615" y="140" width="70" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1bob223_di" bpmnElement="Flow_1bob223">
+        <di:waypoint x="590" y="193" />
+        <di:waypoint x="590" y="280" />
+        <di:waypoint x="700" y="280" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_11nihwm_di" bpmnElement="Flow_11nihwm">
+        <di:waypoint x="800" y="280" />
+        <di:waypoint x="872" y="280" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1i0thdu_di" bpmnElement="Flow_1i0thdu">
+        <di:waypoint x="800" y="168" />
+        <di:waypoint x="860" y="168" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_16xx3v7_di" bpmnElement="Flow_16xx3v7">
+        <di:waypoint x="960" y="168" />
+        <di:waypoint x="1012" y="168" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1a7hewb_di" bpmnElement="Flow_1a7hewb">
+        <di:waypoint x="190" y="168" />
+        <di:waypoint x="240" y="168" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>
