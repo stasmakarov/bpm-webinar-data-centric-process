@@ -5,9 +5,11 @@ import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.router.Route;
 import io.jmix.appsettings.AppSettings;
 import io.jmix.bpm.webinar.processdata.entity.Settings;
+import io.jmix.bpm.webinar.processdata.rabbit.RabbitService;
 import io.jmix.bpm.webinar.processdata.service.ProcessService;
 import io.jmix.bpm.webinar.processdata.service.ResetService;
 import io.jmix.bpm.webinar.processdata.view.main.MainView;
+import io.jmix.flowui.Notifications;
 import io.jmix.flowui.component.combobox.JmixComboBox;
 import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.kit.component.button.JmixButton;
@@ -31,6 +33,10 @@ public class ControlPanelView extends StandardView {
     private ProcessService processService;
     @Autowired
     private RepositoryService repositoryService;
+    @Autowired
+    private RabbitService rabbitService;
+    @Autowired
+    private Notifications notifications;
 
     @ViewComponent
     private TypedTextField<Integer> numOfThreadsField;
@@ -38,6 +44,10 @@ public class ControlPanelView extends StandardView {
     private TypedTextField<Integer> numberOfProcessesField;
     @ViewComponent
     private JmixComboBox<String> processComboBox;
+    @ViewComponent
+    private JmixButton startReadingBtn;
+    @ViewComponent
+    private JmixButton stopReadingBtn;
 
     @Subscribe(id = "resetBtn", subject = "clickListener")
     public void onResetBtnClick(final ClickEvent<JmixButton> event) {
@@ -75,4 +85,37 @@ public class ControlPanelView extends StandardView {
                 .map(ProcessDefinition::getKey)
                 .toList();
     }
+
+    @Subscribe(id = "startReadingBtn", subject = "clickListener")
+    public void onStartReadingBtnClick(final ClickEvent<JmixButton> event) {
+        if (rabbitService.isRabbitAvailable()) {
+            boolean started = rabbitService.startAllContainers();
+            if (started) {
+                startReadingBtn.setEnabled(false);
+                stopReadingBtn.setEnabled(true);
+            } else {
+                notifications.create("One or more Rabbit listeners didn't start")
+                        .withType(Notifications.Type.ERROR)
+                        .show();
+            }
+        } else {
+            notifications.create("Rabbit is unavailable")
+                    .withType(Notifications.Type.ERROR)
+                    .show();
+        }
+    }
+
+    @Subscribe(id = "stopReadingBtn", subject = "clickListener")
+    public void onStopReadingBtnClick(final ClickEvent<JmixButton> event) {
+        if (rabbitService.stopAllContainers()) {
+            startReadingBtn.setEnabled(true);
+            stopReadingBtn.setEnabled(false);
+        } else {
+            notifications.create("One or more Rabbit listener failed to stop")
+                    .withType(Notifications.Type.ERROR)
+                    .show();
+        }
+    }
+
+
 }

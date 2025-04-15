@@ -4,6 +4,13 @@
     <layout>
         <button id="resetBtn" text="Reset all"/>
         <vbox>
+            <h4 text="Read orders from RabbitMQ"/>
+            <hbox>
+                <button id="startReadingBtn" text="Start" themeNames="primary large" width="5em"/>
+                <button id="stopReadingBtn" text="Stop" themeNames="error primary large" width="5em"/>
+            </hbox>
+        </vbox>
+        <vbox>
             <h4 text="Run processes in multiple threads"/>
             <hbox>
                 <textField id="numOfThreadsField" datatype="int" label="Number of threads"/>

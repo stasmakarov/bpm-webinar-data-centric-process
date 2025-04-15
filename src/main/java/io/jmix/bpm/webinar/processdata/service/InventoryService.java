@@ -1,9 +1,13 @@
 package io.jmix.bpm.webinar.processdata.service;
 
 import io.jmix.appsettings.AppSettings;
+import io.jmix.bpm.webinar.processdata.entity.InventoryOperation;
 import io.jmix.bpm.webinar.processdata.entity.Order;
 import io.jmix.bpm.webinar.processdata.entity.Product;
 import io.jmix.bpm.webinar.processdata.entity.Settings;
+import io.jmix.bpm.webinar.processdata.rabbit.InventoryMessageProducer;
+import io.jmix.bpm.webinar.processdata.rabbit.InventoryRequest;
+import io.jmix.bpm.webinar.processdata.rabbit.InventoryReply;
 import io.jmix.bpm.webinar.processdata.repository.OrderRepository;
 import io.jmix.bpm.webinar.processdata.repository.ProductRepository;
 import io.jmix.bpm.webinar.processdata.security.SystemAuthHelper;
@@ -35,6 +39,8 @@ public class InventoryService {
     private AppSettings appSettings;
     @Autowired
     private LockManager lockManager;
+    @Autowired
+    private InventoryMessageProducer inventoryMessageProducer;
 
     public boolean doReservation(Order order) {
         return systemAuthHelper.runWithSystemAuth(() -> {
@@ -154,8 +160,6 @@ public class InventoryService {
     }
 
 
-
-
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public boolean transactionalReservation(String orderId) {
         return systemAuthHelper.runWithSystemAuth(() -> {
@@ -238,4 +242,68 @@ public class InventoryService {
             productRepository.save(product);
         }
     }
+
+    public void sendReservationRequest(Order order) {
+        InventoryRequest inventoryRequest = new InventoryRequest(order.getProduct().getId().toString(),
+                                                                order.getId().toString(),
+                                                                order.getBusinessKey(),
+                                                                order.getQuantity(),
+                                                                InventoryOperation.RESERVATION.getId(),
+                                                                order.getProcessInstanceId() );
+
+        inventoryMessageProducer.sendInventoryMessage(inventoryRequest);
+    }
+
+
+    public InventoryReply proceedRequest(InventoryRequest inventoryRequest) {
+        InventoryReply response = new InventoryReply();
+        response.setBusinessKey(inventoryRequest.getBusinessKey());
+        response.setProcessInstanceId(inventoryRequest.getProcessInstanceId());
+
+        InventoryOperation operation = InventoryOperation.fromId(inventoryRequest.getOperationId());
+        if (operation == null) {
+            log.warn("Unknown operation ID: {}", inventoryRequest.getOperationId());
+            response.setError("Unknown operation");
+            return response;
+        }
+
+        switch (operation) {
+            case RESERVATION -> handleReservation(inventoryRequest, response);
+            case CANCEL_RESERVATION -> log.info("Cancel reservation not implemented yet");
+            case DELIVERY -> log.info("Delivery not implemented yet");
+            case PRODUCTION -> log.info("Production not implemented yet");
+            default -> {
+                log.warn("Unsupported operation: {}", operation);
+            }
+        }
+
+        return response;
+    }
+
+    private void handleReservation(InventoryRequest request, InventoryReply response) {
+        String productId = request.getProductId();
+        systemAuthHelper.runWithSystemAuth(() -> {
+            try {
+                Product product = productRepository.findById(UUID.fromString(productId))
+                        .orElseThrow(() -> new IllegalArgumentException("Product not found: " + productId));
+
+                long inStock = product.getInStock();
+                long qty = request.getQuantity();
+
+                if (inStock >= qty) {
+                    product.setInStock(inStock - qty);
+                    product.setReserved(product.getReserved() + qty);
+                    productRepository.save(product);
+                    response.setReserved(true);
+                } else {
+                    response.setReserved(false);
+                }
+            } catch (Exception e) {
+                log.error("Error during reservation", e);
+                response.setError("Error: " + e.getMessage());
+            }
+            return null;
+        });
+    }
+
 }
