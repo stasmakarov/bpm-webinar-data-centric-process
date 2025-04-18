@@ -23,8 +23,8 @@
       <incoming>Flow_1t5q2sz</incoming>
       <outgoing>Flow_0p7u6iq</outgoing>
     </serviceTask>
-    <sequenceFlow id="Flow_0p7u6iq" sourceRef="Activity_0tumipq" targetRef="Activity_00al6gv" />
-    <serviceTask id="Activity_00al6gv" name="Load product" flowable:type="jmix-load-entities-jpql">
+    <sequenceFlow id="Flow_0p7u6iq" sourceRef="Activity_0tumipq" targetRef="Activity_load_task" />
+    <serviceTask id="Activity_load_task" name="Load product" flowable:type="jmix-load-entities-jpql">
       <extensionElements>
         <flowable:field name="jpql">
           <flowable:string>select p from pdt_Product p where p.id = :id1</flowable:string>
@@ -47,7 +47,7 @@
       <outgoing>Flow_0b6bpt8</outgoing>
       <outgoing>Flow_1bob223</outgoing>
     </exclusiveGateway>
-    <sequenceFlow id="Flow_17n9ebv" sourceRef="Activity_00al6gv" targetRef="Gateway_1u9a0g4" />
+    <sequenceFlow id="Flow_17n9ebv" sourceRef="Activity_load_task" targetRef="Gateway_1u9a0g4" />
     <sequenceFlow id="Flow_0b6bpt8" name="Reservation is possible" sourceRef="Gateway_1u9a0g4" targetRef="Activity_0wpeuyy">
       <extensionElements>
         <jmix:conditionDetails conditionSource="expression" />
@@ -119,7 +119,7 @@
         <omgdc:Bounds x="240" y="128" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_00uf8by_di" bpmnElement="Activity_00al6gv">
+      <bpmndi:BPMNShape id="Activity_00uf8by_di" bpmnElement="Activity_load_task">
         <omgdc:Bounds x="400" y="128" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_1u9a0g4_di" bpmnElement="Gateway_1u9a0g4" isMarkerVisible="true">

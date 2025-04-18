@@ -2,8 +2,6 @@ package io.jmix.bpm.webinar.processdata.view.controlpanel;
 
 
 import com.vaadin.flow.component.ClickEvent;
-import com.vaadin.flow.component.Html;
-import com.vaadin.flow.component.html.IFrame;
 import com.vaadin.flow.router.Route;
 import io.jmix.appsettings.AppSettings;
 import io.jmix.bpm.webinar.processdata.entity.Settings;
@@ -18,6 +16,8 @@ import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.*;
 import org.flowable.engine.RepositoryService;
 import org.flowable.engine.repository.ProcessDefinition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -26,6 +26,7 @@ import java.util.List;
 @ViewController(id = "pdt_ControlPanelView")
 @ViewDescriptor(path = "control-panel-view.xml")
 public class ControlPanelView extends StandardView {
+    private static final Logger log = LoggerFactory.getLogger(ControlPanelView.class);
 
     @Autowired
     private ResetService resetService;
@@ -54,6 +55,7 @@ public class ControlPanelView extends StandardView {
     @Subscribe(id = "resetBtn", subject = "clickListener")
     public void onResetBtnClick(final ClickEvent<JmixButton> event) {
         resetService.resetApp();
+        log.info("🟥Application reset");
     }
 
     @Subscribe(id = "multiBtn", subject = "clickListener")

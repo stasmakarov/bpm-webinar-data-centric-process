@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" xmlns:jmix="http://jmix.io/schema/bpm/bpmn" xmlns:flowable="http://flowable.org/bpmn" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.flowable.org/processdef" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL http://www.omg.org/spec/BPMN/2.0/20100501/BPMN20.xsd">
+  <process id="create-order-optimistic-async-no-error" name="Create order with Optimistic locking handled (async)" isExecutable="true">
+    <documentation>Create order with Optimistic locking handled, async tasks</documentation>
+    <startEvent id="startEvent1">
+      <outgoing>Flow_1s36j3v</outgoing>
+    </startEvent>
+    <sequenceFlow id="Flow_1s36j3v" sourceRef="startEvent1" targetRef="Activity_create_order" />
+    <serviceTask id="Activity_create_order" name="Create order" flowable:async="true" flowable:expression="${pdt_OrderService.createRandomOrderForAsync(execution)}" flowable:resultVariable="orderId" jmix:taskType="springBean" jmix:beanName="pdt_OrderService">
+      <extensionElements>
+        <jmix:springBean beanName="pdt_OrderService" methodName="createRandomOrderForAsync">
+          <jmix:methodParam name="execution" type="org.flowable.engine.delegate.DelegateExecution" isVariable="false">execution</jmix:methodParam>
+        </jmix:springBean>
+      </extensionElements>
+      <incoming>Flow_1s36j3v</incoming>
+      <outgoing>Flow_1hezfy4</outgoing>
+    </serviceTask>
+    <sequenceFlow id="Flow_1hezfy4" sourceRef="Activity_create_order" targetRef="Gateway_1q5s180" />
+    <serviceTask id="Activity_reserve_product" name="Reserve product" flowable:async="true" flowable:expression="${pdt_InventoryService.wrappedReservation(orderId)}" jmix:taskType="springBean" jmix:beanName="pdt_InventoryService">
+      <extensionElements>
+        <jmix:springBean beanName="pdt_InventoryService" methodName="wrappedReservation">
+          <jmix:methodParam name="orderId" type="java.lang.String" isVariable="true">orderId</jmix:methodParam>
+        </jmix:springBean>
+        <flowable:failedJobRetryTimeCycle>R3/PT10S</flowable:failedJobRetryTimeCycle>
+      </extensionElements>
+      <incoming>Flow_1kpk46k</incoming>
+      <outgoing>Flow_13m090m</outgoing>
+    </serviceTask>
+    <exclusiveGateway id="Gateway_is_reserved" default="Flow_1wxo7br">
+      <incoming>Flow_13m090m</incoming>
+      <outgoing>Flow_0wbnvze</outgoing>
+      <outgoing>Flow_1wxo7br</outgoing>
+    </exclusiveGateway>
+    <sequenceFlow id="Flow_13m090m" sourceRef="Activity_reserve_product" targetRef="Gateway_is_reserved" />
+    <sequenceFlow id="Flow_0wbnvze" name="Success" sourceRef="Gateway_is_reserved" targetRef="Activity_set_status_active">
+      <extensionElements>
+        <jmix:conditionDetails conditionSource="expression" />
+      </extensionElements>
+      <conditionExpression xsi:type="tFormalExpression">${isReserved}</conditionExpression>
+    </sequenceFlow>
+    <serviceTask id="Activity_set_status_active" name="Set status &#34;Active&#34;" flowable:async="true" flowable:expression="${pdt_OrderService.setStatusByOrderId(orderId,20)}" jmix:taskType="springBean" jmix:beanName="pdt_OrderService">
+      <extensionElements>
+        <jmix:springBean beanName="pdt_OrderService" methodName="setStatusByOrderId">
+          <jmix:methodParam name="orderId" type="java.lang.String" isVariable="true">orderId</jmix:methodParam>
+          <jmix:methodParam name="statusId" type="int" isVariable="false">20</jmix:methodParam>
+        </jmix:springBean>
+      </extensionElements>
+      <incoming>Flow_0wbnvze</incoming>
+      <outgoing>Flow_1giztyn</outgoing>
+    </serviceTask>
+    <sequenceFlow id="Flow_1wxo7br" sourceRef="Gateway_is_reserved" targetRef="Activity_set_status_cancelled" />
+    <serviceTask id="Activity_set_status_cancelled" name="Set status &#34;Cancelled&#34;" flowable:async="true" flowable:expression="${pdt_OrderService.setStatusByOrderId(orderId,90)}" jmix:taskType="springBean" jmix:beanName="pdt_OrderService">
+      <extensionElements>
+        <jmix:springBean beanName="pdt_OrderService" methodName="setStatusByOrderId">
+          <jmix:methodParam name="orderId" type="java.lang.String" isVariable="true">orderId</jmix:methodParam>
+          <jmix:methodParam name="statusId" type="int" isVariable="false">90</jmix:methodParam>
+        </jmix:springBean>
+      </extensionElements>
+      <incoming>Flow_1wxo7br</incoming>
+      <outgoing>Flow_17tz4qi</outgoing>
+    </serviceTask>
+    <endEvent id="Event_cancelled">
+      <incoming>Flow_17tz4qi</incoming>
+    </endEvent>
+    <sequenceFlow id="Flow_17tz4qi" sourceRef="Activity_set_status_cancelled" targetRef="Event_cancelled" />
+    <endEvent id="Event_success">
+      <incoming>Flow_1giztyn</incoming>
+    </endEvent>
+    <sequenceFlow id="Flow_1giztyn" sourceRef="Activity_set_status_active" targetRef="Event_success" />
+    <exclusiveGateway id="Gateway_1q5s180" default="Flow_0y2vasg">
+      <incoming>Flow_1hezfy4</incoming>
+      <outgoing>Flow_0y2vasg</outgoing>
+      <outgoing>Flow_1kpk46k</outgoing>
+    </exclusiveGateway>
+    <endEvent id="Event_order_not_created">
+      <incoming>Flow_0y2vasg</incoming>
+    </endEvent>
+    <sequenceFlow id="Flow_0y2vasg" sourceRef="Gateway_1q5s180" targetRef="Event_order_not_created" />
+    <sequenceFlow id="Flow_1kpk46k" sourceRef="Gateway_1q5s180" targetRef="Activity_reserve_product" />
+  </process>
+  <error id="reservarion-conflict" name="Reservarion conflict" errorCode="RESERVATION_CONFLICT" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_process">
+    <bpmndi:BPMNPlane id="BPMNPlane_process" bpmnElement="create-order-optimistic-async-no-error">
+      <bpmndi:BPMNShape id="BPMNShape_startEvent1" bpmnElement="startEvent1">
+        <omgdc:Bounds x="150" y="150" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1w3s7yx_di" bpmnElement="Activity_create_order">
+        <omgdc:Bounds x="240" y="128" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1q5s180_di" bpmnElement="Gateway_1q5s180" isMarkerVisible="true">
+        <omgdc:Bounds x="385" y="143" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1ox645e_di" bpmnElement="Event_order_not_created">
+        <omgdc:Bounds x="392" y="262" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_19uz7k2_di" bpmnElement="Activity_reserve_product">
+        <omgdc:Bounds x="540" y="128" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1naccv6_di" bpmnElement="Gateway_is_reserved" isMarkerVisible="true">
+        <omgdc:Bounds x="705" y="143" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1idp8bq_di" bpmnElement="Activity_set_status_active">
+        <omgdc:Bounds x="820" y="128" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_11svuhb_di" bpmnElement="Activity_set_status_cancelled">
+        <omgdc:Bounds x="820" y="240" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_126fxji_di" bpmnElement="Event_cancelled">
+        <omgdc:Bounds x="992" y="262" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0n39z3i_di" bpmnElement="Event_success">
+        <omgdc:Bounds x="992" y="150" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1s36j3v_di" bpmnElement="Flow_1s36j3v">
+        <omgdi:waypoint x="186" y="168" />
+        <omgdi:waypoint x="240" y="168" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1hezfy4_di" bpmnElement="Flow_1hezfy4">
+        <omgdi:waypoint x="340" y="168" />
+        <omgdi:waypoint x="385" y="168" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_13m090m_di" bpmnElement="Flow_13m090m">
+        <omgdi:waypoint x="640" y="168" />
+        <omgdi:waypoint x="705" y="168" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0wbnvze_di" bpmnElement="Flow_0wbnvze">
+        <omgdi:waypoint x="755" y="168" />
+        <omgdi:waypoint x="820" y="168" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="764" y="150" width="42" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1wxo7br_di" bpmnElement="Flow_1wxo7br">
+        <omgdi:waypoint x="730" y="193" />
+        <omgdi:waypoint x="730" y="280" />
+        <omgdi:waypoint x="820" y="280" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_17tz4qi_di" bpmnElement="Flow_17tz4qi">
+        <omgdi:waypoint x="920" y="280" />
+        <omgdi:waypoint x="992" y="280" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1giztyn_di" bpmnElement="Flow_1giztyn">
+        <omgdi:waypoint x="920" y="168" />
+        <omgdi:waypoint x="992" y="168" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0y2vasg_di" bpmnElement="Flow_0y2vasg">
+        <omgdi:waypoint x="410" y="193" />
+        <omgdi:waypoint x="410" y="262" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1kpk46k_di" bpmnElement="Flow_1kpk46k">
+        <omgdi:waypoint x="435" y="168" />
+        <omgdi:waypoint x="540" y="168" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

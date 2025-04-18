@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<view xmlns="http://jmix.io/schema/flowui/view"
+<view xmlns="http://jmix.io/schema/flowui/view" xmlns:charts="http://jmix.io/schema/charts/ui"
       title="msg://controlPanelView.title">
     <layout>
-        <hbox>
+        <vbox>
             <button id="resetBtn" text="Reset all"/>
             <vbox>
                 <h4 text="Read orders from RabbitMQ"/>
@@ -22,8 +22,6 @@
                 </hbox>
                 <button id="multiBtn" text="Run" themeNames="primary"/>
             </vbox>
-            <vbox>
-            </vbox>
-        </hbox>
+        </vbox>
     </layout>
 </view>
